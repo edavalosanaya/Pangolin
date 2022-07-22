@@ -3,19 +3,17 @@ get_filename_component(COMPONENT ${CMAKE_CURRENT_LIST_DIR} NAME)
 option(BUILD_PANGOLIN_PYTHON "Build support for Pangolin Interactive Console" ON)
 
 if(BUILD_PANGOLIN_PYTHON)
-  find_package(Python COMPONENTS Interpreter Development QUIET)
-endif()
+    #find_package(Python COMPONENTS Interpreter Development QUIET)
+    find_package(PythonInterp REQUIRED) 
+    find_package(PythonLibs REQUIRED)
 
-if(BUILD_PANGOLIN_PYTHON AND Python_FOUND)
     # If we've inited the submodule, use that
     if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/pybind11/CMakeLists.txt")
         add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/pybind11)
     else()
         find_package(pybind11 CONFIG REQUIRED)
     endif()
-endif()
 
-if(BUILD_PANGOLIN_PYTHON AND Python_FOUND AND pybind11_FOUND)
     set(SRC_BINDINGS
         ${CMAKE_CURRENT_LIST_DIR}/src/pypangolin/attach.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/pypangolin/colour.cpp
@@ -83,9 +81,10 @@ if(BUILD_PANGOLIN_PYTHON AND Python_FOUND AND pybind11_FOUND)
         REQUIRES "pyopengl;pyopengl-accelerate;numpy;pillow;pybind11"
         PRINT_HELP
     )
+
 else()
     #TODO: with the following line uncommented and BUILD_PANGOLIN_PYTHON=OFF, `make install` fails b/c it tries to install a missing libpango_python.a
     #set_target_properties(${COMPONENT} PROPERTIES EXCLUDE_FROM_ALL 1 EXCLUDE_FROM_DEFAULT_BUILD 1)
     target_sources( ${COMPONENT} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/../pango_core/src/dummy.cpp )
-    message(STATUS "Not building Python wheel - requested '${BUILD_PANGOLIN_PYTHON}', python found '${Python_FOUND}', or pybind11 dependency found '${pybind11_FOUND}'")
+    message(STATUS "Not building Python wheel - requested '${BUILD_PANGOLIN_PYTHON}', python found '${PythonInterp_Found}', or pybind11 dependency found '${pybind11_FOUND}'")
 endif()
